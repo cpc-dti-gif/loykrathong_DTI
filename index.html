@@ -19,7 +19,7 @@ button,input,textarea{font-family:inherit}
 .sky{position:absolute;inset:0 0 45% 0;background:linear-gradient(#040720 0%,#0c1546 55%,#22306f 100%)}
 .star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;animation:tw 3s ease-in-out infinite}
 @keyframes tw{50%{opacity:.15}}
-.moon{position:absolute;top:calc(150px + env(safe-area-inset-top));right:10%;width:78px;height:78px;border-radius:50%;
+.moon{position:absolute;top:calc(185px + env(safe-area-inset-top));right:10%;width:78px;height:78px;border-radius:50%;
   background:radial-gradient(circle at 40% 38%,#fffdf0,#ffeaa8 60%,#f1cc6c);
   box-shadow:0 0 40px 12px rgba(255,230,150,.35),0 0 140px 50px rgba(255,220,130,.14)}
 .lantern{position:absolute;bottom:45%;width:12px;height:16px;border-radius:40% 40% 30% 30%;
@@ -66,7 +66,7 @@ button,input,textarea{font-family:inherit}
 
 /* ---------- UI ---------- */
 header{position:fixed;top:0;left:0;right:0;z-index:200;text-align:center;padding:calc(14px + env(safe-area-inset-top)) 16px 0;pointer-events:none}
-h2{font-family:'Charm',cursive;font-weight:500;font-size:clamp(34px,8vw,54px);color:var(--gold);text-shadow:0 0 18px rgba(255,200,100,.5);line-height:1.1}
+h2{font-family:'Charm',cursive;font-weight:700;font-size:clamp(34px,8vw,54px);color:var(--gold);text-shadow:0 0 18px rgba(255,200,100,.5);line-height:1.1}
 #org{opacity:.8;font-weight:300;font-size:14px}
 .stats{display:inline-flex;gap:8px;margin-top:10px}
 .stats span{background:rgba(255,255,255,.1);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.15);padding:4px 12px;border-radius:999px;font-size:13px}
@@ -161,6 +161,24 @@ textarea:focus,input:focus{border-color:var(--gold)}
 .seg{display:flex;gap:4px;padding:4px;border-radius:999px;background:rgba(0,0,0,.3);margin:0 auto;max-width:340px}
 .seg button{flex:1;border:0;border-radius:999px;padding:9px 6px;font-size:14px;color:#fff;background:transparent;cursor:pointer}
 .seg button.on{background:linear-gradient(135deg,#ffe29a,#ffb347);color:#2a1600;font-weight:500}
+#countdown{display:none;margin-top:8px;font-size:13px;color:#ffe7b5}
+#countdown.show{display:block}
+#countdown b{font-weight:500;color:var(--gold);font-variant-numeric:tabular-nums}
+#closed{position:fixed;inset:0;z-index:800;display:none;align-items:center;justify-content:center;padding:24px;
+  background:rgba(3,6,25,.78);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);text-align:center}
+#closed.show{display:flex}
+.cbox{max-width:360px;animation:zoom .4s ease}
+.cicon{font-size:44px}
+#closed h2{font-family:'Charm',cursive;font-size:40px;color:var(--gold);text-shadow:0 0 18px rgba(255,200,100,.5);margin:6px 0 10px}
+#closed p{opacity:.85;line-height:1.7}
+.csum{margin-top:14px;color:var(--gold)}
+.privacy{font-size:11.5px;line-height:1.6;opacity:.6;text-align:center;margin-top:10px;max-width:420px;padding:0 12px}
+.notice .nicon{font-size:38px}
+.notice ul{list-style:none;text-align:left;margin:14px 0 4px;display:grid;gap:10px}
+.notice li{position:relative;padding-left:22px;font-size:14px;line-height:1.6;opacity:.9}
+.notice li::before{content:'✓';position:absolute;left:0;color:var(--gold)}
+.notice li:empty{display:none}
+.notice b{color:var(--gold);font-weight:500}
 #toast{position:fixed;left:50%;top:calc(130px + env(safe-area-inset-top));transform:translate(-50%,-20px);z-index:900;opacity:0;transition:.35s;
   background:rgba(255,226,154,.95);color:#2a1600;padding:10px 18px;border-radius:999px;font-size:14px;max-width:90vw;text-align:center;pointer-events:none}
 #toast.show{opacity:1;transform:translate(-50%,0)}
@@ -184,6 +202,7 @@ textarea:focus,input:focus{border-color:var(--gold)}
   <h2>ลอยกระทงออนไลน์-DTI</h2>
   <p id="org"></p>
   <div class="stats"><span>✨ <b id="total">0</b> คำอธิษฐาน</span><span>ของฉัน <b id="mine">0</b></span></div>
+  <div id="countdown"></div>
 </header>
 
 <div id="bar">
@@ -205,6 +224,7 @@ textarea:focus,input:focus{border-color:var(--gold)}
     <div class="sugs" id="sugs"></div>
     <button class="primary" id="send">ปล่อยกระทงลงน้ำ ✨</button>
     <p class="hint">ลอยกระทงและปล่อยโคมได้ไม่จำกัด อยากอธิษฐานกี่เรื่องก็ได้เลย</p>
+    <p class="privacy">🔒 เราใช้เฉพาะชื่อและรูปโปรไฟล์ไลน์ของคุณ เพื่อแสดงคู่กับคำอธิษฐานในกิจกรรมนี้เท่านั้น ทุกคนที่เข้าเว็บจะเห็นชื่อ รูป และคำอธิษฐานของคุณ</p>
   </div>
 </div>
 
@@ -229,8 +249,31 @@ textarea:focus,input:focus{border-color:var(--gold)}
   </div>
 </div>
 
+<!-- ป๊อปอัปแจ้งการใช้ข้อมูล -->
+<div class="overlay center" id="notice">
+  <div class="card notice">
+    <div class="nicon">🔒</div>
+    <h3>ก่อนเริ่มกิจกรรม</h3>
+    <ul>
+      <li>เราใช้เฉพาะ<b>ชื่อและรูปโปรไฟล์ไลน์</b>ของคุณ เพื่อแสดงในกิจกรรมนี้เท่านั้น</li>
+      <li>ทุกคนที่เข้าเว็บจะเห็นชื่อ รูป และคำอธิษฐานของคุณ</li>
+      <li>เว็บนี้<b>ไม่เข้าถึง</b>แชต รายชื่อเพื่อน เบอร์โทร หรืออีเมลของคุณ</li>
+      <li id="noticeClose"></li>
+    </ul>
+    <button class="primary" id="noticeOk">รับทราบ เริ่มกิจกรรม 🪷</button>
+  </div>
+</div>
+
 <button id="music" aria-label="เปิด/ปิดเพลง">🔇</button>
 <audio id="bgm" loop preload="auto" playsinline></audio>
+<div id="closed">
+  <div class="cbox">
+    <div class="cicon">🪷🏮</div>
+    <h2>ปิดกิจกรรมแล้ว</h2>
+    <p>ขอบคุณทุกคนที่มาร่วมลอยกระทงและปล่อยโคม<br>ขอให้ทุกคำอธิษฐานเป็นจริงนะ</p>
+    <p class="csum" id="closedSum"></p>
+  </div>
+</div>
 <div id="toast"></div>
 <div id="loading"><div class="spin"></div><div id="loadingText">กำลังเชื่อมต่อ LINE…</div></div>
 
@@ -239,11 +282,12 @@ textarea:focus,input:focus{border-color:var(--gold)}
 const CONFIG = {
   LIFF_ID: '2012769235-XcFTjb7x',          // LIFF ID จาก LINE Developers เช่น '2001234567-AbCdEfGh'
   API_URL: 'https://script.google.com/macros/s/AKfycbyhP2Bv_FGJbZ4ozZQCkk8QfhG7gzBm1QNwsfx-ZNB44NDHGG8wimqh6hRSE9rV5deegA/exec',        // URL Web app ของ Apps Script (ลงท้ายด้วย /exec)
-  ORG_NAME: 'ร่วมเป็นส่วนหนึ่งของการอนุรักษ์วัฒนธรรมไทยและสิ่งแวดล้อมไปพร้อมกันชาว DTI',
+  ORG_NAME: 'ลอยกระทงร่วมกัน ชาวองค์กรของเรา',
   MAX_ON_RIVER: 60,     // จำนวนกระทงที่ลอยบนจอพร้อมกันสูงสุด (ล่าสุด)
   MAX_IN_SKY: 30,       // จำนวนโคมลอยบนฟ้าพร้อมกันสูงสุด (ล่าสุด)
   POLL_MS: 3000,        // เช็กกระทงใหม่ทุก ๆ กี่มิลลิวินาที (ดึงเฉพาะอันใหม่)
   FULL_SYNC_MS: 60000,  // โหลดทั้งหมดใหม่ทุก ๆ กี่มิลลิวินาที (เผื่อมีการลบแถวในชีต)
+  CLOSE_AT: '2026-11-25T12:00:00+07:00', // เวลาปิดกิจกรรม (เวลาไทย) เว้นว่าง = ไม่ปิด
   MUSIC_URL: 'music.mp3', // ไฟล์เพลง (วางไว้ใน repo เดียวกับ index.html) เว้นว่าง = ไม่มีเพลง
   MUSIC_VOLUME: 0.3     // ความดัง 0–1
 };
@@ -422,6 +466,7 @@ async function load(full){
 async function send(){
   const ta = $('#wish');
   const wish = ta.value.trim();
+  if (isClosed()) { showClosed(); return; }
   if (!wish) { ta.classList.remove('shake'); void ta.offsetWidth; ta.classList.add('shake'); ta.focus(); return; }
   if (sending) return;
   sending = true; $('#send').disabled = true;
@@ -444,7 +489,9 @@ async function send(){
   } catch (e) {
     items = items.filter(x => x !== it); total--; render();
     ta.value = wish; updateCount();
-    if (e.message === 'auth' && CONFIG.LIFF_ID) {
+    if (e.message === 'closed') {
+      showClosed();
+    } else if (e.message === 'auth' && CONFIG.LIFF_ID) {
       toast('เซสชันหมดอายุ กำลังเข้าสู่ระบบใหม่…');
       setTimeout(() => liff.login({ redirectUri: location.href }), 1200);
     } else toast('ส่งไม่สำเร็จ ลองใหม่อีกครั้งนะ');
@@ -542,6 +589,47 @@ function buildScene(){
   document.querySelectorAll('#sheet,#wishModal').forEach(o => o.addEventListener('click', e => { if (e.target === o || e.target.hasAttribute('data-close')) closeAll(); }));
 }
 
+/* ---------- ป๊อปอัปแจ้งการใช้ข้อมูล (แสดงครั้งแรกครั้งเดียวต่อเครื่อง) ---------- */
+function showNotice(){
+  return new Promise(res => {
+    if (store('lk_notice') === '1') return res();
+    if (closeTime) {
+      const t = new Date(closeTime).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      $('#noticeClose').textContent = `เปิดให้ร่วมกิจกรรมถึง ${t} น.`;
+    }
+    $('#notice').classList.add('show');
+    $('#noticeOk').onclick = () => { store('lk_notice', '1'); $('#notice').classList.remove('show'); res(); };
+  });
+}
+
+/* ---------- เวลาปิดกิจกรรม ---------- */
+const closeTime = CONFIG.CLOSE_AT ? Date.parse(CONFIG.CLOSE_AT) : 0;
+function isClosed(){ return closeTime > 0 && Date.now() >= closeTime; }
+function showClosed(){
+  closeAll();
+  $('#bar').style.display = 'none';
+  $('#countdown').classList.remove('show');
+  $('#closedSum').textContent = total ? `รวมทั้งหมด ${total.toLocaleString('th-TH')} คำอธิษฐาน ✨` : '';
+  $('#closed').classList.add('show');
+}
+function startCountdown(){
+  if (!closeTime) return;
+  const cd = $('#countdown');
+  const pad = n => String(n).padStart(2, '0');
+  const closeText = new Date(closeTime).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const tick = () => {
+    const left = closeTime - Date.now();
+    if (left <= 0) { clearInterval(timer); showClosed(); return; }
+    const s = Math.floor(left / 1000);
+    cd.innerHTML = left <= 24 * 3600e3
+      ? `⏳ ปิดรับคำอธิษฐานในอีก <b>${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}</b>`
+      : `⏳ เปิดให้ร่วมกิจกรรมถึง <b>${closeText} น.</b>`;
+    cd.classList.add('show');
+  };
+  const timer = setInterval(tick, 1000);
+  tick();
+}
+
 /* ---------- เพลงพื้นหลัง ---------- */
 function setupMusic(){
   if (!CONFIG.MUSIC_URL) return;
@@ -575,6 +663,12 @@ function setupMusic(){
 (async function main(){
   buildScene();
   setupMusic();
+  if (isClosed()) {            // ปิดกิจกรรมแล้ว → ไม่ต้องล็อกอิน แสดงหน้าปิด
+    await load();
+    $('#loading').classList.add('hide');
+    showClosed();
+    return;
+  }
   try {
     me = await initUser();
   } catch (e) {
@@ -586,6 +680,8 @@ function setupMusic(){
   $('#meName').textContent = me.name;
   await load();
   $('#loading').classList.add('hide');
+  await showNotice();
+  startCountdown();
   setInterval(() => { if (!document.hidden) load(); }, CONFIG.POLL_MS);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
 })();
