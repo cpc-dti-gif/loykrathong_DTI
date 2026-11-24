@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ลอยกระทงออนไลน์-DTI</title>
+<title>Loykrathong_DTI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500&family=Charm:wght@400;700&display=swap" rel="stylesheet">
@@ -203,7 +203,8 @@ const CONFIG = {
   API_URL: 'https://script.google.com/macros/s/AKfycbyhP2Bv_FGJbZ4ozZQCkk8QfhG7gzBm1QNwsfx-ZNB44NDHGG8wimqh6hRSE9rV5deegA/exec',        // URL Web app ของ Apps Script (ลงท้ายด้วย /exec)
   ORG_NAME: 'ร่วมเป็นส่วนหนึ่งของการอนุรักษ์วัฒนธรรมไทยและสิ่งแวดล้อมไปพร้อมกันชาว DTI',
   MAX_ON_RIVER: 60,     // จำนวนกระทงที่ลอยบนจอพร้อมกันสูงสุด (ล่าสุด)
-  POLL_MS: 15000,       // ดึงกระทงใหม่ทุก ๆ กี่มิลลิวินาที
+  POLL_MS: 3000,        // เช็กกระทงใหม่ทุก ๆ กี่มิลลิวินาที (ดึงเฉพาะอันใหม่)
+  FULL_SYNC_MS: 60000,  // โหลดทั้งหมดใหม่ทุก ๆ กี่มิลลิวินาที (เผื่อมีการลบแถวในชีต)
   MUSIC_URL: 'music.mp3', // ไฟล์เพลง (วางไว้ใน repo เดียวกับ index.html) เว้นว่าง = ไม่มีเพลง
   MUSIC_VOLUME: 0.3     // ความดัง 0–1
 };
@@ -309,20 +310,42 @@ function demoItems(){
     ['มายด์', 'ขอให้สมหวังในทุกเรื่องที่ตั้งใจ', 'orchid']
   ].map(([name, wish, style], i) => ({ id: 'demo' + i, t: now - (i + 1) * 600000, name, pic: '', wish, style }));
 }
-async function load(){
+let serverCount = -1, loading = false, lastFull = 0;
+async function load(full){
   if (!CONFIG.API_URL) { if (!items.length) { items = demoItems(); total = items.length; } render(); return; }
+  if (loading) return;
+  loading = true;
+  const firstLoad = serverCount < 0;
+  if (firstLoad || Date.now() - lastFull > CONFIG.FULL_SYNC_MS) full = true;
   try {
-    const r = await fetch(CONFIG.API_URL + '?t=' + Date.now());
+    const q = full ? '' : '&since=' + serverCount;
+    const r = await fetch(CONFIG.API_URL + '?t=' + Date.now() + q);
     const d = await r.json();
     if (!d.ok) throw new Error(d.error);
-    const ids = new Set(d.items.map(i => i.id));
-    const pending = items.filter(i => i._pending && !ids.has(i.id));
-    // เก็บสถานะ "ของฉัน" ไว้
-    const mineIds = new Set(items.filter(i => i.mine).map(i => i.id));
-    items = d.items.map(i => (mineIds.has(i.id) ? { ...i, mine: true } : i)).concat(pending);
-    total = d.total + pending.length;
+    if (!full && !d.delta) { loading = false; return load(true); }   // มีการลบแถว → โหลดใหม่ทั้งหมด
+
+    const known = new Set(items.map(i => i.id));
+    const fresh = d.items.filter(i => !known.has(i.id));
+    if (full) {
+      const ids = new Set(d.items.map(i => i.id));
+      const pending = items.filter(i => i._pending && !ids.has(i.id));
+      const mineIds = new Set(items.filter(i => i.mine).map(i => i.id));
+      items = d.items.map(i => (mineIds.has(i.id) ? { ...i, mine: true } : i)).concat(pending);
+      lastFull = Date.now();
+    } else {
+      items = items.concat(fresh);
+    }
+    // กระทงของคนอื่นที่เพิ่งเข้ามา → ให้โผล่กลางจอพร้อมแจ้งเตือน
+    if (!firstLoad) {
+      fresh.forEach(i => { const it = items.find(x => x.id === i.id); if (it) it._new = true; });
+      if (fresh.length === 1) toast(`🪷 ${fresh[0].name} ลอยกระทงแล้ว`);
+      else if (fresh.length > 1) toast(`🪷 มีกระทงใหม่ ${fresh.length} อัน`);
+    }
+    serverCount = d.total;
+    total = d.total + items.filter(i => i._pending).length;
     render();
   } catch (e) { console.warn('load failed', e); }
+  loading = false;
 }
 async function send(){
   const ta = $('#wish');
@@ -486,6 +509,7 @@ function setupMusic(){
   await load();
   $('#loading').classList.add('hide');
   setInterval(() => { if (!document.hidden) load(); }, CONFIG.POLL_MS);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
 })();
 </script>
 </body>
