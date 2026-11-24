@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Loykrathong_DTI</title>
+<title>ลอยกระทงออนไลน์</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500&family=Charm:wght@400;700&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@ button,input,textarea{font-family:inherit}
 .sky{position:absolute;inset:0 0 45% 0;background:linear-gradient(#040720 0%,#0c1546 55%,#22306f 100%)}
 .star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;animation:tw 3s ease-in-out infinite}
 @keyframes tw{50%{opacity:.15}}
-.moon{position:absolute;top:13%;right:10%;width:78px;height:78px;border-radius:50%;
+.moon{position:absolute;top:calc(150px + env(safe-area-inset-top));right:10%;width:78px;height:78px;border-radius:50%;
   background:radial-gradient(circle at 40% 38%,#fffdf0,#ffeaa8 60%,#f1cc6c);
   box-shadow:0 0 40px 12px rgba(255,230,150,.35),0 0 140px 50px rgba(255,220,130,.14)}
 .lantern{position:absolute;bottom:45%;width:12px;height:16px;border-radius:40% 40% 30% 30%;
@@ -125,6 +125,42 @@ textarea:focus,input:focus{border-color:var(--gold)}
 #music.show{display:flex}
 #music.on{box-shadow:0 0 14px rgba(255,210,122,.5);animation:beat 1.6s ease-in-out infinite}
 @keyframes beat{50%{transform:scale(1.08)}}
+/* ---------- โคมลอย ---------- */
+#lanterns{position:absolute;inset:0;pointer-events:none}
+.lan{position:absolute;top:50vh;opacity:0;animation:ascend 55s linear infinite;will-change:transform,opacity}
+@keyframes ascend{
+  0%{transform:translate(0,0) scale(var(--s));opacity:0}
+  5%{opacity:1}
+  80%{opacity:1}
+  100%{transform:translate(var(--dx),-72vh) scale(calc(var(--s) * .3));opacity:0}}
+.sway{position:relative;animation:sway 5s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:translateX(-8px) rotate(-4deg)}50%{transform:translateX(8px) rotate(4deg)}}
+.lt .lbody{position:relative;width:74px;height:92px;cursor:pointer;pointer-events:auto;
+  border-radius:46% 46% 34% 34%/52% 52% 42% 42%;
+  background:radial-gradient(circle at 50% 82%,#fff8d6 0 14%,var(--c) 58%,#8a2c0c 120%);
+  box-shadow:0 0 26px 8px rgba(255,170,60,.45),inset 0 -10px 18px rgba(255,240,190,.55)}
+.lt .lbody::before{content:'';position:absolute;inset:0;border-radius:inherit;
+  background:repeating-linear-gradient(90deg,transparent 0 17px,rgba(120,40,0,.18) 17px 19px)}
+.lt .lbody::after{content:'';position:absolute;left:50%;bottom:-3px;width:46px;height:8px;margin-left:-23px;border-radius:50%;
+  background:#5a2408;border:1px solid #c87a2a}
+.lt .av{position:absolute;left:50%;top:18px;width:42px;height:42px;margin-left:-21px;border-radius:50%;object-fit:cover;
+  border:2px solid #fff3c4;box-shadow:0 0 10px rgba(255,240,180,.8);background:#223;z-index:1}
+.lt .fire{position:absolute;left:50%;bottom:-14px;width:10px;height:14px;margin-left:-5px;border-radius:50%/60% 60% 40% 40%;
+  background:radial-gradient(circle at 50% 70%,#fff 0 20%,#ffd54a 45%,#ff7a00 85%);box-shadow:0 0 16px 6px rgba(255,180,60,.75);
+  transform:rotate(180deg);animation:fl .25s ease-in-out infinite alternate}
+.lt .tag{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:4px;white-space:nowrap;font-size:13px;
+  max-width:170px;overflow:hidden;text-overflow:ellipsis;padding:2px 10px;border-radius:999px;
+  background:rgba(5,10,40,.65);border:1px solid rgba(255,210,122,.45)}
+.lan.new .lbody{animation:pop 1.1s cubic-bezier(.2,1.6,.4,1)}
+.lan.new .tag{background:var(--c);color:#1a1030;font-weight:500}
+.kprev.lt{padding:40px 0 22px}
+.kprev .sway{animation:sway 5s ease-in-out infinite}
+
+.primary.sm{padding:11px 14px;font-size:15px;flex:none}
+.lanbtn{background:linear-gradient(135deg,#ffb36b,#ff6a3d);box-shadow:0 4px 20px rgba(255,110,60,.45)}
+.seg{display:flex;gap:4px;padding:4px;border-radius:999px;background:rgba(0,0,0,.3);margin:0 auto;max-width:340px}
+.seg button{flex:1;border:0;border-radius:999px;padding:9px 6px;font-size:14px;color:#fff;background:transparent;cursor:pointer}
+.seg button.on{background:linear-gradient(135deg,#ffe29a,#ffb347);color:#2a1600;font-weight:500}
 #toast{position:fixed;left:50%;top:calc(130px + env(safe-area-inset-top));transform:translate(-50%,-20px);z-index:900;opacity:0;transition:.35s;
   background:rgba(255,226,154,.95);color:#2a1600;padding:10px 18px;border-radius:999px;font-size:14px;max-width:90vw;text-align:center;pointer-events:none}
 #toast.show{opacity:1;transform:translate(-50%,0)}
@@ -140,33 +176,35 @@ textarea:focus,input:focus{border-color:var(--gold)}
   <div class="sky" id="sky"><div class="moon"></div></div>
   <div class="bank"></div>
   <div class="river"><div class="ripples"></div><div class="moonref"></div></div>
+  <div id="lanterns"></div>
   <div id="krathongs"></div>
 </div>
 
 <header>
-  <h1>ลอยกระทงออนไลน์-DTI</h1>
+  <h2>ลอยกระทงออนไลน์-DTI</h2>
   <p id="org"></p>
-  <div class="stats"><span>🪷 <b id="total">0</b> กระทง</span><span>ของฉัน <b id="mine">0</b></span></div>
+  <div class="stats"><span>✨ <b id="total">0</b> คำอธิษฐาน</span><span>ของฉัน <b id="mine">0</b></span></div>
 </header>
 
 <div id="bar">
   <div class="me"><img id="meAv" alt=""><div><small>สวัสดี</small><b id="meName">…</b></div></div>
-  <button class="primary" id="launch">🪷 ลอยกระทง</button>
+  <button class="primary sm" id="launchK">🪷 กระทง</button>
+  <button class="primary sm lanbtn" id="launchL">🏮 โคมลอย</button>
 </div>
 
 <!-- แผงเขียนคำอธิษฐาน -->
 <div class="overlay" id="sheet">
   <div class="panel">
     <div class="grip"></div>
-    <h2>ลอยกระทงของคุณ</h2>
-    <div class="kt kprev" id="prev"></div>
+    <div class="seg" id="seg"><button data-k="krathong">🪷 ลอยกระทง</button><button data-k="lantern">🏮 ปล่อยโคมลอย</button></div>
+    <div class="kprev" id="prev"></div>
     <div class="styles" id="styles"></div>
     <label for="wish">คำอธิษฐาน / คำอวยพร</label>
     <textarea id="wish" maxlength="150" rows="3" placeholder="ขอให้…"></textarea>
     <div class="cnt"><span id="cnt">0</span>/150</div>
     <div class="sugs" id="sugs"></div>
     <button class="primary" id="send">ปล่อยกระทงลงน้ำ ✨</button>
-    <p class="hint">ลอยได้ไม่จำกัด อยากอธิษฐานกี่เรื่องก็ลอยได้เลย</p>
+    <p class="hint">ลอยกระทงและปล่อยโคมได้ไม่จำกัด อยากอธิษฐานกี่เรื่องก็ได้เลย</p>
   </div>
 </div>
 
@@ -203,6 +241,7 @@ const CONFIG = {
   API_URL: 'https://script.google.com/macros/s/AKfycbyhP2Bv_FGJbZ4ozZQCkk8QfhG7gzBm1QNwsfx-ZNB44NDHGG8wimqh6hRSE9rV5deegA/exec',        // URL Web app ของ Apps Script (ลงท้ายด้วย /exec)
   ORG_NAME: 'ร่วมเป็นส่วนหนึ่งของการอนุรักษ์วัฒนธรรมไทยและสิ่งแวดล้อมไปพร้อมกันชาว DTI',
   MAX_ON_RIVER: 60,     // จำนวนกระทงที่ลอยบนจอพร้อมกันสูงสุด (ล่าสุด)
+  MAX_IN_SKY: 30,       // จำนวนโคมลอยบนฟ้าพร้อมกันสูงสุด (ล่าสุด)
   POLL_MS: 3000,        // เช็กกระทงใหม่ทุก ๆ กี่มิลลิวินาที (ดึงเฉพาะอันใหม่)
   FULL_SYNC_MS: 60000,  // โหลดทั้งหมดใหม่ทุก ๆ กี่มิลลิวินาที (เผื่อมีการลบแถวในชีต)
   MUSIC_URL: 'music.mp3', // ไฟล์เพลง (วางไว้ใน repo เดียวกับ index.html) เว้นว่าง = ไม่มีเพลง
@@ -226,7 +265,12 @@ const SUGGESTIONS = [
 ];
 
 const $ = s => document.querySelector(s);
-let me = null, items = [], total = 0, chosen = 'lotus', sending = false;
+let me = null, items = [], total = 0, chosen = 'lotus', kind = 'krathong', sending = false;
+const isLantern = it => it.kind === 'lantern';
+const KIND_TEXT = {
+  krathong: { send: 'ปล่อยกระทงลงน้ำ ✨', done: '🪷 ลอยกระทงแล้ว ขอให้สมหวังดังใจปรารถนา', other: 'ลอยกระทงแล้ว', icon: '🪷' },
+  lantern:  { send: 'ปล่อยโคมขึ้นฟ้า ✨', done: '🏮 ปล่อยโคมลอยแล้ว ขอให้ความทุกข์ลอยไปกับโคม', other: 'ปล่อยโคมลอยแล้ว', icon: '🏮' }
+};
 const els = new Map();
 
 /* ---------- utils ---------- */
@@ -283,15 +327,40 @@ function makeKrathong(it, isNew){
   return k;
 }
 
+/* ---------- lantern markup ---------- */
+function lanternHTML(){
+  return `<div class="lbody"><img class="av" alt=""><i class="fire"></i></div><div class="tag"></div>`;
+}
+function makeLantern(it, isNew){
+  const r = rng(hash(keyOf(it)) ^ 0x9e37);
+  const s = .6 + r() * .5;
+  const dur = 45 + r() * 25;
+  const delay = isNew ? -dur * .02 : -r() * dur;
+  const c = (STYLES[it.style] || STYLES.marigold).c;
+  const el = document.createElement('div');
+  el.className = 'lan lt' + (isNew ? ' new' : '');
+  el.style.cssText = `left:${(4 + r() * 78).toFixed(1)}%;z-index:${5 + Math.round(s * 10)};--s:${s.toFixed(3)};--c:${c};--dx:${Math.round(r() * 140 - 70)}px;animation-duration:${dur.toFixed(1)}s;animation-delay:${delay.toFixed(1)}s`;
+  el.innerHTML = `<div class="sway" style="animation-delay:${(-r() * 5).toFixed(2)}s">${lanternHTML()}</div>`;
+  setAvatar(el.querySelector('.av'), it.pic, it.name);
+  el.querySelector('.tag').textContent = it.name;
+  el.querySelector('.lbody').onclick = () => openWish(it);
+  if (isNew) setTimeout(() => el.classList.remove('new'), 8000);
+  return el;
+}
+
 /* ---------- render ---------- */
 function render(){
-  const layer = $('#krathongs');
-  const show = items.slice(-CONFIG.MAX_ON_RIVER);
-  const keep = new Set(show.map(keyOf));
+  const river = items.filter(i => !isLantern(i)).slice(-CONFIG.MAX_ON_RIVER);
+  const sky = items.filter(isLantern).slice(-CONFIG.MAX_IN_SKY);
+  const keep = new Set(river.concat(sky).map(keyOf));
   for (const [k, el] of els) if (!keep.has(k)) { el.remove(); els.delete(k); }
-  for (const it of show) {
+  for (const it of river) {
     const k = keyOf(it);
-    if (!els.has(k)) { const el = makeKrathong(it, it._new); els.set(k, el); layer.appendChild(el); }
+    if (!els.has(k)) { const el = makeKrathong(it, it._new); els.set(k, el); $('#krathongs').appendChild(el); }
+  }
+  for (const it of sky) {
+    const k = keyOf(it);
+    if (!els.has(k)) { const el = makeLantern(it, it._new); els.set(k, el); $('#lanterns').appendChild(el); }
   }
   $('#total').textContent = total.toLocaleString('th-TH');
   const mine = me ? items.filter(i => i.mine || (i.name === me.name && i.pic === me.pic)).length : 0;
@@ -307,8 +376,11 @@ function demoItems(){
     ['คุณสมศรี HR', 'ขอให้ทุกคนมีความสุขกับการทำงาน', 'marigold'],
     ['ต้น', 'ขอให้โบนัสออกเยอะ ๆ', 'jasmine'],
     ['เจ๊แดง บัญชี', 'ขอให้ปิดงบทันเวลา ขอให้ครอบครัวมีความสุข', 'lotus'],
-    ['มายด์', 'ขอให้สมหวังในทุกเรื่องที่ตั้งใจ', 'orchid']
-  ].map(([name, wish, style], i) => ({ id: 'demo' + i, t: now - (i + 1) * 600000, name, pic: '', wish, style }));
+    ['มายด์', 'ขอให้สมหวังในทุกเรื่องที่ตั้งใจ', 'orchid'],
+    ['พี่นุ่น', 'ขอให้เรื่องร้าย ๆ ลอยไปกับโคม', 'marigold', 'lantern'],
+    ['บอส', 'ขอให้ปีหน้ายอดขายทะลุเป้า 🚀', 'lotus', 'lantern'],
+    ['แพร', 'ขอให้ได้เที่ยวญี่ปุ่นสักที', 'jasmine', 'lantern']
+  ].map(([name, wish, style, kind], i) => ({ id: 'demo' + i, t: now - (i + 1) * 600000, name, pic: '', wish, style, kind: kind || 'krathong' }));
 }
 let serverCount = -1, loading = false, lastFull = 0;
 async function load(full){
@@ -338,8 +410,8 @@ async function load(full){
     // กระทงของคนอื่นที่เพิ่งเข้ามา → ให้โผล่กลางจอพร้อมแจ้งเตือน
     if (!firstLoad) {
       fresh.forEach(i => { const it = items.find(x => x.id === i.id); if (it) it._new = true; });
-      if (fresh.length === 1) toast(`🪷 ${fresh[0].name} ลอยกระทงแล้ว`);
-      else if (fresh.length > 1) toast(`🪷 มีกระทงใหม่ ${fresh.length} อัน`);
+      if (fresh.length === 1) { const t = KIND_TEXT[isLantern(fresh[0]) ? 'lantern' : 'krathong']; toast(`${t.icon} ${fresh[0].name} ${t.other}`); }
+      else if (fresh.length > 1) toast(`✨ มีคำอธิษฐานใหม่ ${fresh.length} อัน`);
     }
     serverCount = d.total;
     total = d.total + items.filter(i => i._pending).length;
@@ -353,17 +425,17 @@ async function send(){
   if (!wish) { ta.classList.remove('shake'); void ta.offsetWidth; ta.classList.add('shake'); ta.focus(); return; }
   if (sending) return;
   sending = true; $('#send').disabled = true;
-  const it = { id: uid(), t: Date.now(), name: me.name, pic: me.pic, wish, style: chosen, _new: true, _pending: true, mine: true };
+  const it = { id: uid(), t: Date.now(), name: me.name, pic: me.pic, wish, style: chosen, kind, _new: true, _pending: true, mine: true };
   items.push(it); total++; render();
   ta.value = ''; updateCount(); closeAll();
-  toast('🪷 ลอยกระทงแล้ว ขอให้สมหวังดังใจปรารถนา');
+  toast(KIND_TEXT[kind].done);
   try {
     if (CONFIG.API_URL) {
       const idToken = (CONFIG.LIFF_ID && window.liff) ? (liff.getIDToken() || '') : '';
       const r = await fetch(CONFIG.API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ id: it.id, wish, style: chosen, name: me.name, pic: me.pic, idToken })
+        body: JSON.stringify({ id: it.id, wish, style: it.style, kind: it.kind, name: me.name, pic: me.pic, idToken })
       });
       const d = await r.json();
       if (!d.ok) throw new Error(d.error || 'fail');
@@ -375,7 +447,7 @@ async function send(){
     if (e.message === 'auth' && CONFIG.LIFF_ID) {
       toast('เซสชันหมดอายุ กำลังเข้าสู่ระบบใหม่…');
       setTimeout(() => liff.login({ redirectUri: location.href }), 1200);
-    } else toast('ส่งกระทงไม่สำเร็จ ลองใหม่อีกครั้งนะ');
+    } else toast('ส่งไม่สำเร็จ ลองใหม่อีกครั้งนะ');
   } finally {
     setTimeout(() => { sending = false; $('#send').disabled = false; }, 1500);
   }
@@ -408,11 +480,15 @@ function demoLogin(){
 }
 
 /* ---------- UI ---------- */
-function openSheet(){
+function openSheet(k){
+  if (k === 'krathong' || k === 'lantern') kind = k;
   const prev = $('#prev');
   const c = STYLES[chosen].c;
   prev.style.setProperty('--c', c);
-  prev.innerHTML = bodyHTML(c);
+  if (kind === 'lantern') { prev.className = 'kprev lt'; prev.innerHTML = `<div class="sway">${lanternHTML()}</div>`; }
+  else { prev.className = 'kprev kt'; prev.innerHTML = bodyHTML(c); }
+  [...$('#seg').children].forEach(b => b.classList.toggle('on', b.dataset.k === kind));
+  $('#send').textContent = KIND_TEXT[kind].send;
   setAvatar(prev.querySelector('.av'), me.pic, me.name);
   prev.querySelector('.tag').textContent = me.name;
   [...$('#styles').children].forEach(b => b.classList.toggle('on', b.dataset.s === chosen));
@@ -448,7 +524,7 @@ function buildScene(){
     const b = document.createElement('button');
     b.dataset.s = k; b.style.setProperty('--c', v.c);
     b.innerHTML = `<i></i>${v.n}`;
-    b.onclick = () => { chosen = k; store('lk_style', k); openSheet(); };
+    b.onclick = () => { chosen = k; store('lk_style', k); openSheet(); };   // ใช้สีเดียวกันทั้งกระทงและโคม
     st.appendChild(b);
   }
   const sg = $('#sugs');
@@ -459,7 +535,9 @@ function buildScene(){
   });
   chosen = STYLES[store('lk_style')] ? store('lk_style') : 'lotus';
   $('#wish').oninput = updateCount;
-  $('#launch').onclick = openSheet;
+  $('#launchK').onclick = () => openSheet('krathong');
+  $('#launchL').onclick = () => openSheet('lantern');
+  [...$('#seg').children].forEach(b => b.onclick = () => openSheet(b.dataset.k));
   $('#send').onclick = send;
   document.querySelectorAll('#sheet,#wishModal').forEach(o => o.addEventListener('click', e => { if (e.target === o || e.target.hasAttribute('data-close')) closeAll(); }));
 }
