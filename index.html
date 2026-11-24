@@ -119,6 +119,12 @@ textarea:focus,input:focus{border-color:var(--gold)}
 .muted{opacity:.7;font-size:14px;margin:8px 0 4px}
 .card .primary{width:100%;margin-top:14px}
 
+#music{position:fixed;top:calc(12px + env(safe-area-inset-top));right:12px;z-index:300;width:42px;height:42px;border-radius:50%;
+  border:1px solid rgba(255,210,122,.45);background:rgba(5,10,40,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  color:#fff;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center}
+#music.show{display:flex}
+#music.on{box-shadow:0 0 14px rgba(255,210,122,.5);animation:beat 1.6s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.08)}}
 #toast{position:fixed;left:50%;top:calc(130px + env(safe-area-inset-top));transform:translate(-50%,-20px);z-index:900;opacity:0;transition:.35s;
   background:rgba(255,226,154,.95);color:#2a1600;padding:10px 18px;border-radius:999px;font-size:14px;max-width:90vw;text-align:center;pointer-events:none}
 #toast.show{opacity:1;transform:translate(-50%,0)}
@@ -185,6 +191,8 @@ textarea:focus,input:focus{border-color:var(--gold)}
   </div>
 </div>
 
+<button id="music" aria-label="เปิด/ปิดเพลง">🔇</button>
+<audio id="bgm" loop preload="auto" playsinline></audio>
 <div id="toast"></div>
 <div id="loading"><div class="spin"></div><div id="loadingText">กำลังเชื่อมต่อ LINE…</div></div>
 
@@ -195,7 +203,7 @@ const CONFIG = {
   API_URL: 'https://script.google.com/macros/s/AKfycbyhP2Bv_FGJbZ4ozZQCkk8QfhG7gzBm1QNwsfx-ZNB44NDHGG8wimqh6hRSE9rV5deegA/exec',        // URL Web app ของ Apps Script (ลงท้ายด้วย /exec)
   ORG_NAME: 'ลอยกระทงร่วมกัน ชาวองค์กรของเรา',
   MAX_ON_RIVER: 60,     // จำนวนกระทงที่ลอยบนจอพร้อมกันสูงสุด (ล่าสุด)
-  POLL_MS: 15000        // ดึงกระทงใหม่ทุก ๆ กี่มิลลิวินาที
+  POLL_MS: 15000,       // ดึงกระทงใหม่ทุก ๆ กี่มิลลิวินาที
   MUSIC_URL: 'music.mp3', // ไฟล์เพลง (วางไว้ใน repo เดียวกับ index.html) เว้นว่าง = ไม่มีเพลง
   MUSIC_VOLUME: 0.5     // ความดัง 0–1
 };
@@ -433,8 +441,39 @@ function buildScene(){
   document.querySelectorAll('#sheet,#wishModal').forEach(o => o.addEventListener('click', e => { if (e.target === o || e.target.hasAttribute('data-close')) closeAll(); }));
 }
 
+/* ---------- เพลงพื้นหลัง ---------- */
+function setupMusic(){
+  if (!CONFIG.MUSIC_URL) return;
+  const a = $('#bgm'), btn = $('#music');
+  a.src = CONFIG.MUSIC_URL;
+  a.volume = CONFIG.MUSIC_VOLUME;
+  btn.classList.add('show');
+  let wanted = store('lk_music') !== 'off';   // ผู้ใช้อยากฟังไหม (จำไว้ในเครื่อง)
+  const ui = () => { const on = !a.paused; btn.textContent = on ? '🔊' : '🔇'; btn.classList.toggle('on', on); };
+  const play = () => a.play().then(ui).catch(ui);
+  a.addEventListener('play', ui); a.addEventListener('pause', ui);
+  btn.onclick = e => {
+    e.stopPropagation();
+    if (a.paused) { wanted = true; store('lk_music', 'on'); play(); }
+    else { wanted = false; store('lk_music', 'off'); a.pause(); }
+  };
+  // เบราว์เซอร์ไม่ยอมให้เล่นเสียงเองจนกว่าผู้ใช้จะแตะจอ จึงเริ่มเล่นเมื่อแตะครั้งแรก
+  const firstTouch = e => {
+    if (btn.contains(e.target)) return;      // ให้ปุ่มเพลงจัดการเอง
+    document.removeEventListener('pointerdown', firstTouch);
+    if (wanted && a.paused) play();
+  };
+  document.addEventListener('pointerdown', firstTouch);
+  if (wanted) play();
+  // พักเพลงเมื่อสลับไปแอปอื่น แล้วเล่นต่อเมื่อกลับมา
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) a.pause(); else if (wanted) play();
+  });
+}
+
 (async function main(){
   buildScene();
+  setupMusic();
   try {
     me = await initUser();
   } catch (e) {
