@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ลอยกระทงออนไลน์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500&family=Charm:wght@400;700&display=swap" rel="stylesheet">
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+:root{--gold:#ffd27a;--ink:#0b1030;--panel:#121a4a}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:'Mitr',sans-serif;color:#fff;background:#060a24}
+button,input,textarea{font-family:inherit}
+
+/* ---------- Scene ---------- */
+#scene{position:fixed;inset:0;overflow:hidden}
+.sky{position:absolute;inset:0 0 45% 0;background:linear-gradient(#040720 0%,#0c1546 55%,#22306f 100%)}
+.star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;animation:tw 3s ease-in-out infinite}
+@keyframes tw{50%{opacity:.15}}
+.moon{position:absolute;top:13%;right:10%;width:78px;height:78px;border-radius:50%;
+  background:radial-gradient(circle at 40% 38%,#fffdf0,#ffeaa8 60%,#f1cc6c);
+  box-shadow:0 0 40px 12px rgba(255,230,150,.35),0 0 140px 50px rgba(255,220,130,.14)}
+.lantern{position:absolute;bottom:45%;width:12px;height:16px;border-radius:40% 40% 30% 30%;
+  background:radial-gradient(circle at 50% 70%,#fff1b0,#ff9d2e 60%,#d9571a);
+  box-shadow:0 0 14px 5px rgba(255,150,40,.45);opacity:0;animation:rise linear infinite}
+@keyframes rise{0%{transform:translate(0,0) scale(1);opacity:0}10%{opacity:.95}
+  100%{transform:translate(var(--dx),-55vh) scale(.35);opacity:0}}
+.bank{position:absolute;left:0;right:0;top:calc(55% - 20px);height:22px;background:#02040f;
+  clip-path:polygon(0 60%,6% 30%,11% 55%,18% 20%,25% 50%,33% 35%,40% 60%,48% 25%,55% 55%,63% 30%,70% 50%,78% 20%,86% 45%,93% 30%,100% 50%,100% 100%,0 100%)}
+.river{position:absolute;inset:55% 0 0 0;background:linear-gradient(#152464 0%,#0b1544 40%,#040922 100%);overflow:hidden}
+.ripples{position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 16px,rgba(150,180,255,.07) 16px 18px);animation:rip 7s linear infinite}
+@keyframes rip{to{background-position:0 36px}}
+.moonref{position:absolute;top:0;right:calc(10% + 19px);width:40px;height:100%;
+  background:repeating-linear-gradient(180deg,rgba(255,228,160,.55) 0 3px,transparent 3px 12px);
+  filter:blur(1.5px);-webkit-mask-image:linear-gradient(#000,transparent 75%);mask-image:linear-gradient(#000,transparent 75%);
+  animation:shim 2.2s ease-in-out infinite alternate}
+@keyframes shim{to{transform:scaleX(1.5);opacity:.5}}
+
+/* ---------- Krathong ---------- */
+#krathongs{position:absolute;inset:0;pointer-events:none}
+.k{position:absolute;left:0;animation:drift 60s linear infinite;will-change:transform}
+@keyframes drift{from{transform:translateX(-170px) scale(var(--s))}to{transform:translateX(calc(100vw + 40px)) scale(var(--s))}}
+.bob{position:relative;animation:bob 3.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-6px) rotate(3deg)}}
+.kt .body{position:relative;width:130px;height:110px;cursor:pointer;pointer-events:auto}
+.kt .base{position:absolute;left:0;bottom:0;width:130px;height:70px}
+.kt .av{position:absolute;left:50%;top:14px;width:52px;height:52px;margin-left:-26px;border-radius:50%;object-fit:cover;
+  border:3px solid var(--c);box-shadow:0 0 16px var(--c);background:#223}
+.kt .candle{position:absolute;top:32px;width:5px;height:22px;border-radius:2px;background:linear-gradient(#fff8e0,#dcc68f)}
+.kt .candle.l{left:27px}.kt .candle.r{right:27px}
+.kt .flame{position:absolute;left:50%;top:-13px;width:8px;height:13px;margin-left:-4px;border-radius:50%/60% 60% 40% 40%;
+  background:radial-gradient(circle at 50% 70%,#fff 0 20%,#ffd54a 45%,#ff7a00 85%);
+  box-shadow:0 0 12px 4px rgba(255,190,80,.7);transform-origin:50% 100%;animation:fl .22s ease-in-out infinite alternate}
+.kt .candle.r .flame{animation-delay:.11s}
+@keyframes fl{to{transform:scale(.88,1.14) rotate(4deg)}}
+.kt .glow{position:absolute;left:50%;bottom:-8px;width:160px;height:34px;margin-left:-80px;background:radial-gradient(ellipse,rgba(255,200,100,.35),transparent 70%)}
+.kt .tag{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;white-space:nowrap;font-size:13px;
+  max-width:170px;overflow:hidden;text-overflow:ellipsis;padding:2px 10px;border-radius:999px;
+  background:rgba(5,10,40,.65);border:1px solid rgba(255,210,122,.45)}
+.refl{position:absolute;left:50%;top:100%;width:110px;height:42px;margin-left:-55px;background:radial-gradient(ellipse at top,rgba(255,200,110,.3),transparent 70%);filter:blur(3px)}
+.k.new .body{animation:pop 1.1s cubic-bezier(.2,1.6,.4,1)}
+.k.new .tag{background:var(--c);color:#1a1030;font-weight:500}
+@keyframes pop{from{transform:scale(0) translateY(50px)}}
+
+/* ---------- UI ---------- */
+header{position:fixed;top:0;left:0;right:0;z-index:200;text-align:center;padding:calc(14px + env(safe-area-inset-top)) 16px 0;pointer-events:none}
+h1{font-family:'Charm',cursive;font-weight:700;font-size:clamp(34px,8vw,54px);color:var(--gold);text-shadow:0 0 18px rgba(255,200,100,.5);line-height:1.1}
+#org{opacity:.8;font-weight:300;font-size:14px}
+.stats{display:inline-flex;gap:8px;margin-top:10px}
+.stats span{background:rgba(255,255,255,.1);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.15);padding:4px 12px;border-radius:999px;font-size:13px}
+.stats b{color:var(--gold);font-weight:500}
+
+#bar{position:fixed;left:0;right:0;bottom:0;z-index:200;display:flex;align-items:center;gap:12px;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(2,4,20,.85) 40%)}
+.me{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.me img{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)}
+.me div{min-width:0}.me small{display:block;font-size:11px;opacity:.7}
+.me b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.primary{border:0;border-radius:999px;padding:13px 22px;font-size:16px;font-weight:500;color:#2a1600;cursor:pointer;
+  background:linear-gradient(135deg,#ffe29a,#ffb347);box-shadow:0 4px 20px rgba(255,170,60,.45)}
+.primary:active{transform:scale(.97)}
+.primary:disabled{opacity:.5}
+.ghost{border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;border-radius:999px;padding:10px 22px;font-size:15px;cursor:pointer}
+
+.overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,15,.6);display:none;align-items:flex-end;justify-content:center}
+.overlay.show{display:flex}
+.overlay.center{align-items:center;padding:20px}
+.panel{width:100%;max-width:520px;max-height:92vh;overflow:auto;background:var(--panel);border-radius:22px 22px 0 0;
+  padding:10px 20px calc(20px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,210,122,.3);animation:up .3s ease}
+@keyframes up{from{transform:translateY(100%)}}
+.grip{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,.3);margin:0 auto 12px}
+.panel h2{text-align:center;font-weight:500;font-size:19px}
+.kprev{display:flex;justify-content:center;padding:34px 0 8px}
+.kprev .body{animation:bob 3.4s ease-in-out infinite}
+.styles{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0 14px}
+.styles button{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.styles button i{width:12px;height:12px;border-radius:50%;background:var(--c)}
+.styles button.on{border-color:var(--gold);background:rgba(255,210,122,.15)}
+label{font-size:14px;opacity:.85}
+textarea,input{width:100%;margin-top:6px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:#fff;padding:12px 14px;font-size:16px;resize:none;outline:none}
+textarea:focus,input:focus{border-color:var(--gold)}
+.cnt{text-align:right;font-size:12px;opacity:.6;margin-top:4px}
+.sugs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 14px;scrollbar-width:none}
+.sugs::-webkit-scrollbar{display:none}
+.sugs button{flex:none;border:0;background:rgba(255,255,255,.08);color:#ffe7b5;border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer}
+.panel .primary{width:100%}
+.hint{text-align:center;font-size:12px;opacity:.6;margin-top:10px}
+.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.card{width:100%;max-width:360px;background:var(--panel);border-radius:22px;padding:26px 22px;text-align:center;border:1px solid rgba(255,210,122,.3);animation:zoom .25s ease}
+@keyframes zoom{from{transform:scale(.85);opacity:0}}
+.card img{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid var(--c,var(--gold));box-shadow:0 0 22px var(--c,var(--gold))}
+.card h3{margin-top:10px;font-weight:500}
+.card .wishtext{font-family:'Charm',cursive;font-size:24px;line-height:1.5;color:var(--gold);margin:14px 0;white-space:pre-wrap;word-break:break-word}
+.card small{display:block;opacity:.55;margin-bottom:16px}
+.muted{opacity:.7;font-size:14px;margin:8px 0 4px}
+.card .primary{width:100%;margin-top:14px}
+
+#toast{position:fixed;left:50%;top:calc(130px + env(safe-area-inset-top));transform:translate(-50%,-20px);z-index:900;opacity:0;transition:.35s;
+  background:rgba(255,226,154,.95);color:#2a1600;padding:10px 18px;border-radius:999px;font-size:14px;max-width:90vw;text-align:center;pointer-events:none}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#loading{position:fixed;inset:0;z-index:1000;background:#060a24;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .5s}
+#loading.hide{opacity:0;pointer-events:none}
+.spin{width:36px;height:36px;border-radius:50%;border:3px solid rgba(255,210,122,.25);border-top-color:var(--gold);animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="scene">
+  <div class="sky" id="sky"><div class="moon"></div></div>
+  <div class="bank"></div>
+  <div class="river"><div class="ripples"></div><div class="moonref"></div></div>
+  <div id="krathongs"></div>
+</div>
+
+<header>
+  <h1>ลอยกระทงออนไลน์</h1>
+  <p id="org"></p>
+  <div class="stats"><span>🪷 <b id="total">0</b> กระทง</span><span>ของฉัน <b id="mine">0</b></span></div>
+</header>
+
+<div id="bar">
+  <div class="me"><img id="meAv" alt=""><div><small>สวัสดี</small><b id="meName">…</b></div></div>
+  <button class="primary" id="launch">🪷 ลอยกระทง</button>
+</div>
+
+<!-- แผงเขียนคำอธิษฐาน -->
+<div class="overlay" id="sheet">
+  <div class="panel">
+    <div class="grip"></div>
+    <h2>ลอยกระทงของคุณ</h2>
+    <div class="kt kprev" id="prev"></div>
+    <div class="styles" id="styles"></div>
+    <label for="wish">คำอธิษฐาน / คำอวยพร</label>
+    <textarea id="wish" maxlength="150" rows="3" placeholder="ขอให้…"></textarea>
+    <div class="cnt"><span id="cnt">0</span>/150</div>
+    <div class="sugs" id="sugs"></div>
+    <button class="primary" id="send">ปล่อยกระทงลงน้ำ ✨</button>
+    <p class="hint">ลอยได้ไม่จำกัด อยากอธิษฐานกี่เรื่องก็ลอยได้เลย</p>
+  </div>
+</div>
+
+<!-- ดูคำอวยพร -->
+<div class="overlay center" id="wishModal">
+  <div class="card" id="wmCard">
+    <img id="wmAv" alt="">
+    <h3 id="wmName"></h3>
+    <p class="wishtext" id="wmWish"></p>
+    <small id="wmTime"></small>
+    <button class="ghost" data-close>ปิด</button>
+  </div>
+</div>
+
+<!-- โหมดทดลอง (เมื่อยังไม่ได้ใส่ LIFF ID) -->
+<div class="overlay center" id="demo">
+  <div class="card">
+    <h3>โหมดทดลอง</h3>
+    <p class="muted">ยังไม่ได้ตั้งค่า LIFF ID เลยยังดึงโปรไฟล์ไลน์ไม่ได้ ใส่ชื่อเพื่อลองใช้งานก่อนได้</p>
+    <input id="demoName" maxlength="40" placeholder="ชื่อของคุณ">
+    <button class="primary" id="demoGo">เริ่มเลย</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="loading"><div class="spin"></div><div id="loadingText">กำลังเชื่อมต่อ LINE…</div></div>
+
+<script>
+/* =================== ตั้งค่า =================== */
+const CONFIG = {
+  LIFF_ID: '',          // LIFF ID จาก LINE Developers เช่น '2001234567-AbCdEfGh'
+  API_URL: 'https://script.google.com/macros/s/AKfycbyhP2Bv_FGJbZ4ozZQCkk8QfhG7gzBm1QNwsfx-ZNB44NDHGG8wimqh6hRSE9rV5deegA/exec',        // URL Web app ของ Apps Script (ลงท้ายด้วย /exec)
+  ORG_NAME: 'ลอยกระทงร่วมกัน ชาวองค์กรของเรา',
+  MAX_ON_RIVER: 60,     // จำนวนกระทงที่ลอยบนจอพร้อมกันสูงสุด (ล่าสุด)
+  POLL_MS: 15000        // ดึงกระทงใหม่ทุก ๆ กี่มิลลิวินาที
+};
+/* ============================================= */
+
+const STYLES = {
+  lotus:    { c: '#ff8fb6', n: 'บัวชมพู' },
+  marigold: { c: '#ffb703', n: 'ดาวเรือง' },
+  orchid:   { c: '#c39bff', n: 'กล้วยไม้' },
+  jasmine:  { c: '#fff1c9', n: 'มะลิ' }
+};
+const SUGGESTIONS = [
+  'ขอให้สุขภาพแข็งแรง ไม่เจ็บไม่ป่วย',
+  'ขอให้งานราบรื่น ปังทุกโปรเจกต์',
+  'ขอให้ครอบครัวมีความสุข',
+  'ขอให้โบนัสออกเยอะ ๆ 😆',
+  'ขอให้ทีมเราเติบโตไปด้วยกัน',
+  'ขอให้สมหวังทุกสิ่งที่ตั้งใจ'
+];
+
+const $ = s => document.querySelector(s);
+let me = null, items = [], total = 0, chosen = 'lotus', sending = false;
+const els = new Map();
+
+/* ---------- utils ---------- */
+function hash(s){ let h = 2166136261; for (const ch of String(s)) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function rng(seed){ return () => { seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function keyOf(it){ return it.id || (it.t + '|' + it.name + '|' + String(it.wish || '').slice(0, 12)); }
+function fallbackAvatar(name){
+  const ch = ([...String(name || '?').trim()][0] || '?').replace(/[<&>"']/g, '');
+  const hue = hash(name || '') % 360;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="hsl(${hue},55%,45%)"/><text x="32" y="43" font-size="30" text-anchor="middle" fill="#fff" font-family="sans-serif">${ch}</text></svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+function setAvatar(img, pic, name){
+  img.referrerPolicy = 'no-referrer';
+  img.onerror = () => { img.onerror = null; img.src = fallbackAvatar(name); };
+  img.src = pic || fallbackAvatar(name);
+}
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 3000); }
+function store(k, v){ try { v === undefined ? (v = localStorage.getItem(k)) : localStorage.setItem(k, v); return v; } catch (e) { return null; } }
+
+/* ---------- krathong markup ---------- */
+function baseSVG(c){
+  let petals = '', flowers = '';
+  for (let i = 0; i < 9; i++) {
+    const x = 12 + i * 13.25;
+    petals += `<path d="M${x - 9} 34 Q${x} 3 ${x + 9} 34Z" fill="${i % 2 ? '#3f8f3a' : '#2c7a2a'}" stroke="#1b521a" stroke-width="1"/>`;
+  }
+  for (let i = 0; i < 7; i++) flowers += `<circle cx="${17 + i * 16}" cy="${36 + (i % 2) * 2}" r="5" fill="${c}" stroke="rgba(255,255,255,.6)" stroke-width="1"/>`;
+  return `<svg class="base" viewBox="0 0 130 70" aria-hidden="true">
+    <path d="M4 32 Q65 84 126 32Z" fill="#235d21"/>${petals}${flowers}
+    <path d="M4 33 Q65 54 126 33" fill="none" stroke="#5fae4f" stroke-width="3"/></svg>`;
+}
+function bodyHTML(c){
+  return `<div class="body"><div class="glow"></div>${baseSVG(c)}<img class="av" alt="">
+    <div class="candle l"><i class="flame"></i></div><div class="candle r"><i class="flame"></i></div>
+    <div class="tag"></div></div>`;
+}
+function makeKrathong(it, isNew){
+  const r = rng(hash(keyOf(it)));
+  const y = r();                       // 0 = ไกล, 1 = ใกล้
+  const s = .5 + y * .55;
+  const dur = 70 - y * 30;
+  const delay = isNew ? -dur * .3 : -r() * dur;
+  const c = (STYLES[it.style] || STYLES.lotus).c;
+  const k = document.createElement('div');
+  k.className = 'k kt' + (isNew ? ' new' : '');
+  k.style.cssText = `top:calc(${(55 + y * 30).toFixed(2)}vh - ${Math.round(100 * s)}px);z-index:${10 + Math.round(y * 100)};--s:${s.toFixed(3)};--c:${c};animation-duration:${dur.toFixed(1)}s;animation-delay:${delay.toFixed(1)}s`;
+  k.innerHTML = `<div class="bob" style="animation-delay:${(-r() * 3).toFixed(2)}s">${bodyHTML(c)}<div class="refl"></div></div>`;
+  setAvatar(k.querySelector('.av'), it.pic, it.name);
+  k.querySelector('.tag').textContent = it.name;
+  k.querySelector('.body').onclick = () => openWish(it);
+  if (isNew) setTimeout(() => k.classList.remove('new'), 8000);
+  return k;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const layer = $('#krathongs');
+  const show = items.slice(-CONFIG.MAX_ON_RIVER);
+  const keep = new Set(show.map(keyOf));
+  for (const [k, el] of els) if (!keep.has(k)) { el.remove(); els.delete(k); }
+  for (const it of show) {
+    const k = keyOf(it);
+    if (!els.has(k)) { const el = makeKrathong(it, it._new); els.set(k, el); layer.appendChild(el); }
+  }
+  $('#total').textContent = total.toLocaleString('th-TH');
+  const mine = me ? items.filter(i => i.mine || (i.name === me.name && i.pic === me.pic)).length : 0;
+  $('#mine').textContent = mine.toLocaleString('th-TH');
+}
+
+/* ---------- data ---------- */
+function demoItems(){
+  const now = Date.now();
+  return [
+    ['น้องฝ้าย', 'ขอให้ทุกคนในทีมสุขภาพแข็งแรงนะคะ', 'lotus'],
+    ['พี่บอย IT', 'ขอให้ระบบไม่ล่มตอนตีสาม 🙏', 'orchid'],
+    ['คุณสมศรี HR', 'ขอให้ทุกคนมีความสุขกับการทำงาน', 'marigold'],
+    ['ต้น', 'ขอให้โบนัสออกเยอะ ๆ', 'jasmine'],
+    ['เจ๊แดง บัญชี', 'ขอให้ปิดงบทันเวลา ขอให้ครอบครัวมีความสุข', 'lotus'],
+    ['มายด์', 'ขอให้สมหวังในทุกเรื่องที่ตั้งใจ', 'orchid']
+  ].map(([name, wish, style], i) => ({ id: 'demo' + i, t: now - (i + 1) * 600000, name, pic: '', wish, style }));
+}
+async function load(){
+  if (!CONFIG.API_URL) { if (!items.length) { items = demoItems(); total = items.length; } render(); return; }
+  try {
+    const r = await fetch(CONFIG.API_URL + '?t=' + Date.now());
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error);
+    const ids = new Set(d.items.map(i => i.id));
+    const pending = items.filter(i => i._pending && !ids.has(i.id));
+    // เก็บสถานะ "ของฉัน" ไว้
+    const mineIds = new Set(items.filter(i => i.mine).map(i => i.id));
+    items = d.items.map(i => (mineIds.has(i.id) ? { ...i, mine: true } : i)).concat(pending);
+    total = d.total + pending.length;
+    render();
+  } catch (e) { console.warn('load failed', e); }
+}
+async function send(){
+  const ta = $('#wish');
+  const wish = ta.value.trim();
+  if (!wish) { ta.classList.remove('shake'); void ta.offsetWidth; ta.classList.add('shake'); ta.focus(); return; }
+  if (sending) return;
+  sending = true; $('#send').disabled = true;
+  const it = { id: uid(), t: Date.now(), name: me.name, pic: me.pic, wish, style: chosen, _new: true, _pending: true, mine: true };
+  items.push(it); total++; render();
+  ta.value = ''; updateCount(); closeAll();
+  toast('🪷 ลอยกระทงแล้ว ขอให้สมหวังดังใจปรารถนา');
+  try {
+    if (CONFIG.API_URL) {
+      const idToken = (CONFIG.LIFF_ID && window.liff) ? (liff.getIDToken() || '') : '';
+      const r = await fetch(CONFIG.API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ id: it.id, wish, style: chosen, name: me.name, pic: me.pic, idToken })
+      });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'fail');
+    }
+    it._pending = false;
+  } catch (e) {
+    items = items.filter(x => x !== it); total--; render();
+    ta.value = wish; updateCount();
+    if (e.message === 'auth' && CONFIG.LIFF_ID) {
+      toast('เซสชันหมดอายุ กำลังเข้าสู่ระบบใหม่…');
+      setTimeout(() => liff.login({ redirectUri: location.href }), 1200);
+    } else toast('ส่งกระทงไม่สำเร็จ ลองใหม่อีกครั้งนะ');
+  } finally {
+    setTimeout(() => { sending = false; $('#send').disabled = false; }, 1500);
+  }
+}
+
+/* ---------- user ---------- */
+async function initUser(){
+  if (!CONFIG.LIFF_ID) return demoLogin();
+  await liff.init({ liffId: CONFIG.LIFF_ID });
+  if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return new Promise(() => {}); }
+  const p = await liff.getProfile();
+  return { id: p.userId, name: p.displayName, pic: p.pictureUrl || '' };
+}
+function demoLogin(){
+  return new Promise(res => {
+    $('#loading').classList.add('hide');
+    const inp = $('#demoName');
+    inp.value = store('lk_demo_name') || '';
+    $('#demo').classList.add('show');
+    const go = () => {
+      const name = inp.value.trim();
+      if (!name) { inp.focus(); return; }
+      store('lk_demo_name', name);
+      $('#demo').classList.remove('show');
+      res({ id: 'demo', name, pic: '' });
+    };
+    $('#demoGo').onclick = go;
+    inp.onkeydown = e => { if (e.key === 'Enter') go(); };
+  });
+}
+
+/* ---------- UI ---------- */
+function openSheet(){
+  const prev = $('#prev');
+  const c = STYLES[chosen].c;
+  prev.style.setProperty('--c', c);
+  prev.innerHTML = bodyHTML(c);
+  setAvatar(prev.querySelector('.av'), me.pic, me.name);
+  prev.querySelector('.tag').textContent = me.name;
+  [...$('#styles').children].forEach(b => b.classList.toggle('on', b.dataset.s === chosen));
+  $('#sheet').classList.add('show');
+}
+function openWish(it){
+  const c = (STYLES[it.style] || STYLES.lotus).c;
+  $('#wmCard').style.setProperty('--c', c);
+  setAvatar($('#wmAv'), it.pic, it.name);
+  $('#wmName').textContent = it.name;
+  $('#wmWish').textContent = it.wish;
+  $('#wmTime').textContent = it.t ? new Date(it.t).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+  $('#wishModal').classList.add('show');
+}
+function closeAll(){ document.querySelectorAll('#sheet,#wishModal').forEach(o => o.classList.remove('show')); }
+function updateCount(){ $('#cnt').textContent = [...$('#wish').value].length; }
+
+function buildScene(){
+  const sky = $('#sky');
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement('i'); s.className = 'star';
+    s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 95}%;animation-delay:${-Math.random() * 3}s;opacity:${.4 + Math.random() * .6};transform:scale(${.5 + Math.random()})`;
+    sky.appendChild(s);
+  }
+  for (let i = 0; i < 7; i++) {
+    const l = document.createElement('i'); l.className = 'lantern';
+    l.style.cssText = `left:${5 + Math.random() * 85}%;--dx:${(Math.random() * 80 - 40).toFixed(0)}px;animation-duration:${18 + Math.random() * 14}s;animation-delay:${-Math.random() * 30}s`;
+    sky.appendChild(l);
+  }
+  $('#org').textContent = CONFIG.ORG_NAME;
+  const st = $('#styles');
+  for (const [k, v] of Object.entries(STYLES)) {
+    const b = document.createElement('button');
+    b.dataset.s = k; b.style.setProperty('--c', v.c);
+    b.innerHTML = `<i></i>${v.n}`;
+    b.onclick = () => { chosen = k; store('lk_style', k); openSheet(); };
+    st.appendChild(b);
+  }
+  const sg = $('#sugs');
+  SUGGESTIONS.forEach(t => {
+    const b = document.createElement('button'); b.textContent = t;
+    b.onclick = () => { $('#wish').value = t; updateCount(); };
+    sg.appendChild(b);
+  });
+  chosen = STYLES[store('lk_style')] ? store('lk_style') : 'lotus';
+  $('#wish').oninput = updateCount;
+  $('#launch').onclick = openSheet;
+  $('#send').onclick = send;
+  document.querySelectorAll('#sheet,#wishModal').forEach(o => o.addEventListener('click', e => { if (e.target === o || e.target.hasAttribute('data-close')) closeAll(); }));
+}
+
+(async function main(){
+  buildScene();
+  try {
+    me = await initUser();
+  } catch (e) {
+    console.error(e);
+    $('#loadingText').textContent = 'เชื่อมต่อ LINE ไม่สำเร็จ ลองเปิดลิงก์ใหม่อีกครั้ง';
+    return;
+  }
+  setAvatar($('#meAv'), me.pic, me.name);
+  $('#meName').textContent = me.name;
+  await load();
+  $('#loading').classList.add('hide');
+  setInterval(() => { if (!document.hidden) load(); }, CONFIG.POLL_MS);
+})();
+</script>
+</body>
+</html>
